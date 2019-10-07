@@ -1,44 +1,50 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import numpy
 ip = ""
 class Serv(BaseHTTPRequestHandler):
-    dic = {}
+    dic = numpy.zeros((1600, 3))
     i = 0
-    while(i < 1600):
-            dic[str(i)] = str(0)
-            i = i + 1
-    print("initf")
+    while i < 1600:
+        dic[i][0] = i
+        i = i + 1
+        
     print("Input address")
     ip = input()
-    if ip == "d":
-        ip = "13.235.75.0"
     def do_GET(self):
         
         request = self.path
         action = request[1:2]
-        addr = request[3:]
+        val = int(request[3:8]) - 10000
+        addr = int(request[9:])
         resp = ""
         if action == "p":
             try:
-                resp = self.dic[addr]
+                resp = str(self.dic[addr][1])
             except KeyError:
                 resp = "Invalid User ID"
         elif action == "i":
             try:
-                bal = int(self.dic[addr])
-                bal += 1
-                self.dic[addr] = str(bal)
-                resp = self.dic[addr]
+                bal = self.dic[addr][1]
+                bal += val
+                self.dic[addr][1] = bal
+                resp = str(self.dic[addr][1])
             except KeyError:
                 resp = "Invalid User ID"
         elif action == "d":
             try:
-                bal = int(self.dic[addr])
-                if (bal - 1) > -1:
-                    bal -= 1
-                    self.dic[addr] = str(bal)
-                    resp = self.dic[addr]
+                bal = self.dic[addr][1]
+                if (bal - val ) > -1:
+                    bal -= val
+                    self.dic[addr][1] = bal
+                    resp = str(self.dic[addr][1])
                 else:
                     resp = "insufficient balance"
+            except KeyError:
+                resp = "Invalid User ID"
+        elif action == "q":
+            try:
+                self.dic[addr][2] += val
+                resp = str(self.dic[addr][2])
             except KeyError:
                 resp = "Invalid User ID"
         else:
